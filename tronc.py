@@ -115,7 +115,7 @@ class TopicModelTransformer:
         return X, Y
 
 class Validator:
-    def validate(self, X, Y):
+    def validate(self, X, Y, model):
         # Model Training & Evaluation
         M = len(Y)
         num_train = int(M*.8)
@@ -134,7 +134,7 @@ class Validator:
         Y_test = Y[:-num_train]
         Y_test = y_scaler.transform(Y_test.reshape(-1,1))
 
-        model = RandomForestRegressor().fit(X_train, Y_train)
+        model.fit(X_train, Y_train)
 
         y_pred = model.predict(X_test)
 
@@ -145,9 +145,16 @@ class Validator:
         print('r2', r2_score(Y_test, y_pred))
 
 
+if __name__ == "__main__":
+    posts_filename = 'posts.json'
+    posts_df = Extractor().extract(posts_filename)
+    X, Y = TopicModelTransformer().transform(posts_df, 16, 10)
+    
+    model = RandomForestRegressor()
+    Validator().validate(X, Y, model)
+    
+    model = Lasso(alpha=.1)
+    Validator().validate(X, Y, model)
 
-posts_filename = 'posts.json'
-posts_df = Extractor().extract(posts_filename)
-X, Y = TopicModelTransformer().transform(posts_df, 16, 10)
-Validator().validate(X, Y)
+    
 
